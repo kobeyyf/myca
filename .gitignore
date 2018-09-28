@@ -16,3 +16,5 @@ example.com
 crypto-config
 channel-artifacts
 crypto-config.ok
+*DS_Store
+*.tar.gz
