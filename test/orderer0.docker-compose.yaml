@@ -1,0 +1,31 @@
+version: '2'
+services:
+  orderer0:
+    container_name: orderer0
+    hostname: orderer0.dctest.com
+    image: hyperledger/fabric-orderer:1.2.0
+    
+    environment:
+      - ORDERER_GENERAL_LOGLEVEL=error
+      - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
+      - ORDERER_GENERAL_GENESISMETHOD=file
+      - ORDERER_GENERAL_GENESISFILE=/var/hyperledger/orderer/orderer.genesis.block
+      - ORDERER_GENERAL_LOCALMSPID=OrdererMSP
+      - ORDERER_GENERAL_LOCALMSPDIR=/var/hyperledger/orderer/msp
+      # enabled TLS
+      - ORDERER_GENERAL_TLS_ENABLED=true
+      - ORDERER_GENERAL_TLS_PRIVATEKEY=/var/hyperledger/orderer/tls/server.key
+      - ORDERER_GENERAL_TLS_CERTIFICATE=/var/hyperledger/orderer/tls/server.crt
+      - ORDERER_GENERAL_TLS_ROOTCAS=[/var/hyperledger/orderer/tls/ca.crt]
+      - ORDERER_KAFKA_RETRY_SHORTINTERVAL=1s
+      - ORDERER_KAFKA_RETRY_SHORTTOTAL=30s
+      - ORDERER_KAFKA_VERBOSE=true
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric
+    command: orderer
+    volumes:
+    - ./channel-artifacts/genesis.block:/var/hyperledger/orderer/orderer.genesis.block
+    - ./crypto-config/ordererOrganizations/dctest.com/orderers/orderer0.dctest.com/msp:/var/hyperledger/orderer/msp
+    - ./crypto-config/ordererOrganizations/dctest.com/orderers/orderer0.dctest.com/tls/:/var/hyperledger/orderer/tls
+    ports:
+      - 7050:7050
+

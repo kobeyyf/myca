@@ -1,0 +1,38 @@
+# Copyright IBM Corp. All Rights Reserved.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+# ---------------------------------------------------------------------------
+# "OrdererOrgs" - Definition of organizations managing orderer nodes
+# ---------------------------------------------------------------------------
+OrdererOrgs:
+  # ---------------------------------------------------------------------------
+  # Orderer
+  # ---------------------------------------------------------------------------
+  - Name: Orderer
+    Domain: dctest.com
+    CA:
+        Country: CN
+        Province: FuJian
+        Locality: FuZhou
+    Template:
+      Count: 3
+# ---------------------------------------------------------------------------
+# "PeerOrgs" - Definition of organizations managing peer nodes
+# ---------------------------------------------------------------------------
+PeerOrgs:
+  # ---------------------------------------------------------------------------
+  # Org1
+  # ---------------------------------------------------------------------------
+  - Name: Org1
+    Domain: org1.dctest.com
+    EnableNodeOUs: true
+    CA:
+        Country: CN
+        Province: FuJian
+        Locality: FuZhou
+    Template:
+      Count: 1
+    Users:
+      Count: 1

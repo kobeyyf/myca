@@ -1,0 +1,18 @@
+version: '2'
+services:
+  kafka0:
+    hostname: kafka1.dctest.com
+    container_name: kafka1
+    image: hyperledger/fabric-kafka:0.4.10
+    restart: always
+    environment:
+      - KAFKA_MESSAGE_MAX_BYTES=103809024 # 99 * 1024 * 1024 B
+      - KAFKA_REPLICA_FETCH_MAX_BYTES=103809024 # 99 * 1024 * 1024 B
+      - KAFKA_UNCLEAN_LEADER_ELECTION_ENABLE=false
+      - KAFKA_BROKER_ID=1
+      - KAFKA_MIN_INSYNC_REPLICAS=2
+      - KAFKA_DEFAULT_REPLICATION_FACTOR=3
+      - KAFKA_ZOOKEEPER_CONNECT=zookeeper0.dctest.com:2181,zookeeper1.dctest.com:2181,zookeeper2.dctest.com:2181
+    ports:
+      - 9092:9092
+      - 9093:9093
