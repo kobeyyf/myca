@@ -58,7 +58,7 @@ func (self *ActionAddUser) Run() (err error) {
 	if err = copyAdminCert(adminCertPath, filepath.Join(self.saveDir, "msp", "admincerts")); err != nil {
 		return err
 	}
-	os.Remove(filepath.Join(self.saveDir, "users", userName, "msp", "admincerts", userName+"-cert.pem"))
+	// os.Remove(filepath.Join(self.saveDir, "users", userName, "msp", "admincerts", userName+"-cert.pem"))
 
 	if err = copyAdminCert(adminCertPath, filepath.Join(self.saveDir, "users", userName, "msp", "admincerts")); err != nil {
 		return err
