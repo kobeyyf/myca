@@ -39,7 +39,6 @@ func (self *ActionAddOrderer) Check(args *Args) error {
 }
 
 func (self *ActionAddOrderer) Run() (err error) {
-	fmt.Println(self.CAPath)
 	self.CA, err = LoadCA(self.CAPath)
 	if err != nil {
 		fmt.Println(self.CAPath)

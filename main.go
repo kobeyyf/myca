@@ -27,7 +27,7 @@ func main() {
 	}
 	if err := action.Run(); err != nil {
 		fmt.Println(err)
-		fmt.Println(args)
+		// fmt.Println(args)
 		return
 	}
 }
