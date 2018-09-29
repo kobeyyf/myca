@@ -73,10 +73,11 @@ func (self *ActionInit) Run() (err error) {
 	// Admin@example.com
 	// users/Admin@example.com
 	admin := fmt.Sprintf("%s@%s", "Admin", self.domain)
-	generateNodes(filepath.Join(self.saveDir, "users"), admin, self.CA, self.TlsCA, msp.CLIENT)
+	generateNodes(filepath.Join(self.saveDir, "users"), admin, self.CA, self.TlsCA, msp.CLIENT, false)
 
 	adminCertPath := filepath.Join(self.saveDir, "users", admin, "msp", "signcerts",
 		admin+"-cert.pem")
+	os.RemoveAll(filepath.Join(self.saveDir, "msp", "admincerts"))
 	if err = copyAdminCert(adminCertPath, filepath.Join(self.saveDir, "msp", "admincerts")); err != nil {
 		return err
 	}
@@ -116,11 +117,11 @@ func copyFile(src, dst string) error {
 	return cerr
 }
 
-func generateNodes(baseDir string, nodeName string, signCA *ca.CA, tlsCA *ca.CA, nodeType int) {
+func generateNodes(baseDir string, nodeName string, signCA *ca.CA, tlsCA *ca.CA, nodeType int, nodeOUs bool) {
 
 	nodeDir := filepath.Join(baseDir, nodeName)
 	if _, err := os.Stat(nodeDir); os.IsNotExist(err) {
-		err := msp.GenerateLocalMSP(nodeDir, nodeName, nil, signCA, tlsCA, nodeType, false)
+		err := msp.GenerateLocalMSP(nodeDir, nodeName, nil, signCA, tlsCA, nodeType, nodeOUs)
 		if err != nil {
 
 			fmt.Printf("Error generating local MSP for %s:\n%v\n", nodeName, err)

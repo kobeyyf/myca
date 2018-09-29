@@ -29,6 +29,8 @@ type Args struct {
 	OrganizationalUnit string
 	StreetAddress      string
 	PostalCode         string
+
+	EnabledNodeOUs bool
 }
 
 // O 组织
@@ -56,6 +58,7 @@ func GetArgs() (*Args, error) {
 		OrganizationalUnit: "myca",
 		StreetAddress:      "",
 		PostalCode:         "",
+		EnabledNodeOUs:     true,
 	}
 
 	for _, arg := range args[2:] {
@@ -84,6 +87,10 @@ func GetArgs() (*Args, error) {
 			a.Locality = fields[1]
 		case "--C":
 			a.Country = fields[1]
+		case "--EnabledNodeOUs":
+			if fields[1] != "Y" && fields[1] != "y" {
+				a.EnabledNodeOUs = false
+			}
 		}
 	}
 	return a, nil

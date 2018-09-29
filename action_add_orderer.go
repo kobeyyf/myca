@@ -54,7 +54,7 @@ func (self *ActionAddOrderer) Run() (err error) {
 	ordererName := fmt.Sprintf("%s.%s", self.name, self.domain)
 	adminCertPath := filepath.Join(self.saveDir, "users", admin, "msp", "signcerts", admin+"-cert.pem")
 
-	generateNodes(filepath.Join(self.saveDir, "orderers"), ordererName, self.CA, self.TlsCA, msp.ORDERER)
+	generateNodes(filepath.Join(self.saveDir, "orderers"), ordererName, self.CA, self.TlsCA, msp.ORDERER, false)
 
 	if err = copyAdminCert(adminCertPath, filepath.Join(self.saveDir, "msp", "admincerts")); err != nil {
 		return err

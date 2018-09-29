@@ -42,6 +42,8 @@ func newAction(args *Args) (Action, error) {
 		return new(ActionAddOrderer), nil
 	case "AddPeer":
 		return new(ActionAddPeer), nil
+	case "AddOrg":
+		return new(ActionAddOrg), nil
 	}
 	return nil, errors.New("unSupportCommand")
 }

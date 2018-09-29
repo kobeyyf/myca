@@ -54,7 +54,7 @@ func (self *ActionAddPeer) Run() (err error) {
 	peerName := fmt.Sprintf("%s.%s", self.name, self.domain)
 	adminCertPath := filepath.Join(self.saveDir, "users", admin, "msp", "signcerts", admin+"-cert.pem")
 
-	generateNodes(filepath.Join(self.saveDir, "peers"), peerName, self.CA, self.TlsCA, msp.ORDERER)
+	generateNodes(filepath.Join(self.saveDir, "peers"), peerName, self.CA, self.TlsCA, msp.PEER, true)
 
 	if err = copyAdminCert(adminCertPath, filepath.Join(self.saveDir, "msp", "admincerts")); err != nil {
 		return err

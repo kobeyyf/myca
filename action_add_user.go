@@ -3,7 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
-	"os"
+	// "os"
 	"path/filepath"
 
 	"github.com/hyperledger/fabric/common/tools/cryptogen/ca"
@@ -52,7 +52,7 @@ func (self *ActionAddUser) Run() (err error) {
 
 	admin := fmt.Sprintf("%s@%s", "Admin", self.domain)
 	userName := fmt.Sprintf("%s@%s", self.name, self.domain)
-	generateNodes(filepath.Join(self.saveDir, "users"), userName, self.CA, self.TlsCA, msp.CLIENT)
+	generateNodes(filepath.Join(self.saveDir, "users"), userName, self.CA, self.TlsCA, msp.CLIENT, self.EnabledNodeOUs)
 
 	adminCertPath := filepath.Join(self.saveDir, "users", admin, "msp", "signcerts", admin+"-cert.pem")
 	if err = copyAdminCert(adminCertPath, filepath.Join(self.saveDir, "msp", "admincerts")); err != nil {
@@ -60,9 +60,9 @@ func (self *ActionAddUser) Run() (err error) {
 	}
 	// os.Remove(filepath.Join(self.saveDir, "users", userName, "msp", "admincerts", userName+"-cert.pem"))
 
-	if err = copyAdminCert(adminCertPath, filepath.Join(self.saveDir, "users", userName, "msp", "admincerts")); err != nil {
-		return err
-	}
+	// if err = copyAdminCert(adminCertPath, filepath.Join(self.saveDir, "users", userName, "msp", "admincerts")); err != nil {
+	// 	return err
+	// }
 
 	return nil
 }
