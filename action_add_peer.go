@@ -11,7 +11,6 @@ import (
 )
 
 type ActionAddPeer struct {
-	saveDir string // xxx/xxx/example.com
 	*Args
 
 	CA    *ca.CA
@@ -20,13 +19,6 @@ type ActionAddPeer struct {
 
 func (self *ActionAddPeer) Check(args *Args) error {
 	self.Args = args
-
-	if self.domain == "" {
-		self.saveDir = args.dir
-		self.domain = filepath.Base(args.dir)
-	} else {
-		self.saveDir = filepath.Join(args.dir, args.domain)
-	}
 
 	if self.name == "" {
 		return errors.New("Need name")
@@ -39,29 +31,29 @@ func (self *ActionAddPeer) Check(args *Args) error {
 }
 
 func (self *ActionAddPeer) Run() (err error) {
-	self.CA, err = LoadCA(self.CAPath)
-	if err != nil {
-		fmt.Println(self.CAPath)
-		return err
-	}
-
-	self.TlsCA, err = LoadCA(self.tlsCAPath)
+	self.CA, err = LoadCA(self.caDir)
 	if err != nil {
 		return err
 	}
 
-	admin := fmt.Sprintf("%s@%s", "Admin", self.domain)
-	peerName := fmt.Sprintf("%s.%s", self.name, self.domain)
-	adminCertPath := filepath.Join(self.saveDir, "users", admin, "msp", "signcerts", admin+"-cert.pem")
-
-	generateNodes(filepath.Join(self.saveDir, "peers"), peerName, self.CA, self.TlsCA, msp.PEER, true)
-
-	if err = copyAdminCert(adminCertPath, filepath.Join(self.saveDir, "msp", "admincerts")); err != nil {
+	self.TlsCA, err = LoadCA(self.tlscaDir)
+	if err != nil {
 		return err
 	}
-	os.Remove(filepath.Join(self.saveDir, "peers", peerName, "msp", "admincerts", peerName+"-cert.pem"))
 
-	if err = copyAdminCert(adminCertPath, filepath.Join(self.saveDir, "peers", peerName, "msp", "admincerts")); err != nil {
+	peerName := fmt.Sprintf("%s.%s", self.Name, self.Domain)
+	peerMsp := filepath.Join(self.peersDir, peerName, "msp")
+	generateNodes(self.peersDir, peerName, self.CA, self.TlsCA, msp.PEER, true)
+
+	admin := "Admin@" + self.domain
+	adminCertPath := filepath.Join(self.usersDir, admin, "msp", "signcerts", admin+"-cert.pem")
+	if err = copyAdminCert(adminCertPath, filepath.Join(peerMsp, "admincerts")); err != nil {
+		return err
+	}
+
+	os.Remove(filepath.Join(peerMsp, "admincerts", peerName+"-cert.pem"))
+
+	if err = copyAdminCert(adminCertPath, filepath.Join(peerMsp, "admincerts")); err != nil {
 		return err
 	}
 

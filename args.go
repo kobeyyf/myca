@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 )
 
@@ -13,13 +14,9 @@ var (
 type Args struct {
 	command string
 
-	dir    string // 证书所在目录
-	domain string
-	name   string // 名称
-
-	// 使用自定义证书
-	CAPath    string
-	tlsCAPath string
+	Savedir string // 证书所在目录
+	Domain  string // 域名
+	Name    string // 名称
 
 	// csr模版
 	Country            string
@@ -30,7 +27,12 @@ type Args struct {
 	StreetAddress      string
 	PostalCode         string
 
-	EnabledNodeOUs bool
+	// 路径信息
+	caDir       string
+	tlscaDir    string
+	usersDir    string
+	orderersDir string
+	peersDir    string
 }
 
 // O 组织
@@ -42,14 +44,14 @@ func GetArgs() (*Args, error) {
 	args := os.Args
 
 	if len(args) < 2 {
-		return nil, fmt.Errorf(ERR_ARGS_TEMPLATE, "缺少command")
+		return nil, fmt.Errorf(ERR_ARGS_TEMPLATE, "缺少 command")
 	}
 
 	a := &Args{
 		command: args[1],
-		dir:     "./",
-		name:    "",
-		domain:  "example.com",
+		Savedir: "./",
+		Name:    "",
+		Domain:  "",
 
 		Country:            "CN",
 		Province:           "FuJian",
@@ -58,7 +60,6 @@ func GetArgs() (*Args, error) {
 		OrganizationalUnit: "myca",
 		StreetAddress:      "",
 		PostalCode:         "",
-		EnabledNodeOUs:     true,
 	}
 
 	for _, arg := range args[2:] {
@@ -67,16 +68,12 @@ func GetArgs() (*Args, error) {
 			continue
 		}
 		switch fields[0] {
-		case "--dir":
-			a.dir = fields[1]
+		case "--save_dir":
+			a.Savedir = fields[1]
 		case "--name":
-			a.name = fields[1]
+			a.Name = fields[1]
 		case "--domain":
-			a.domain = fields[1]
-		case "--CAPath":
-			a.CAPath = fields[1]
-		case "--TlsCAPath":
-			a.tlsCAPath = fields[1]
+			a.Domain = fields[1]
 		case "--O":
 			a.Organizational = fields[1]
 		case "--OU":
@@ -87,11 +84,17 @@ func GetArgs() (*Args, error) {
 			a.Locality = fields[1]
 		case "--C":
 			a.Country = fields[1]
-		case "--EnabledNodeOUs":
-			if fields[1] != "Y" && fields[1] != "y" {
-				a.EnabledNodeOUs = false
-			}
 		}
 	}
+
+	if a.Domain == "" {
+		return nil, fmt.Errorf(ERR_ARGS_TEMPLATE, "缺少域名 --domain")
+	}
+	a.caDir = filepath.Join(a.Savedir, a.Domain, "ca")
+	a.usersDir = filepath.Join(a.Savedir, a.Domain, "users")
+	a.tlscaDir = filepath.Join(a.Savedir, a.Domain, "tlsca")
+	a.orderersDir = filepath.Join(a.Savedir, a.Domain, "orderers")
+	a.peersDir = filepath.Join(a.Savedir, a.Domain, "peers")
+
 	return a, nil
 }

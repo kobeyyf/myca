@@ -13,7 +13,6 @@ import (
 )
 
 type ActionInit struct {
-	saveDir string // xxx/xxx/example.com
 	*Args
 
 	CA    *ca.CA
@@ -23,62 +22,41 @@ type ActionInit struct {
 //
 func (self *ActionInit) Check(args *Args) error {
 	self.Args = args
-
-	if self.domain == "" {
-		self.saveDir = args.dir
-		self.domain = filepath.Base(args.dir)
-	} else {
-		self.saveDir = filepath.Join(args.dir, args.domain)
-	}
-
-	if self.CAPath == "" {
-		self.CAPath = filepath.Join(self.saveDir, "ca")
-	}
-	if self.tlsCAPath == "" {
-		self.tlsCAPath = filepath.Join(self.saveDir, "tlsca")
-	}
-
 	return nil
 }
 
 //
 func (self *ActionInit) Run() (err error) {
 
-	// 获取ca 证书
-	// 使用目录下的ca
-	self.CA, err = LoadCA(self.CAPath)
+	self.CA, err = LoadCA(self.caDir)
 	if err != nil || self.CA == nil {
 		// fmt.Println(err)
-		self.CA, err = GenCA(self.CAPath, "ca."+self.domain, self.Args)
+		self.CA, err = GenCA(self.caDir, "ca."+self.Domain, self.Args)
 		if err != nil {
 			return err
 		}
 	}
 
-	self.TlsCA, err = LoadCA(self.tlsCAPath)
-	if err != nil {
-		self.TlsCA, err = GenCA(self.tlsCAPath, "tlsca."+self.domain, self.Args)
+	self.TlsCA, err = LoadCA(self.tlscaDir)
+	if err != nil || self.CA == nil {
+		self.TlsCA, err = GenCA(self.tlscaDir, "tlsca."+self.Domain, self.Args)
 		if err != nil {
 			return err
 		}
 	}
 
-	mspDir := filepath.Join(self.saveDir, "msp")
+	mspDir := filepath.Join(self.Savedir, self.Domain, "msp")
 	err = msp.GenerateVerifyingMSP(mspDir, self.CA, self.TlsCA, false)
 	if err != nil {
 		return err
 	}
 
-	// 新建Admin用户
-	// Admin@example.com
-	// users/Admin@example.com
-	admin := fmt.Sprintf("%s@%s", "Admin", self.domain)
-	generateNodes(filepath.Join(self.saveDir, "users"), admin, self.CA, self.TlsCA, msp.CLIENT, false)
+	adminUser := "Admin@" + self.domain
+	generateNodes(self.usersDir, adminUser, self.CA, self.TlsCA, msp.CLIENT, false)
 
-	adminCertPath := filepath.Join(self.saveDir, "users", admin, "msp", "signcerts",
-		admin+"-cert.pem")
-	os.RemoveAll(filepath.Join(self.saveDir, "msp", "admincerts"))
-	if err = copyAdminCert(adminCertPath, filepath.Join(self.saveDir, "msp", "admincerts")); err != nil {
+	adminUserCertPath := filepath.Join(self.usersDir, adminUser, "msp", "signcerts", adminUser+"-cert.pem")
+
+	if err = copyAdminCert(adminUserCertPath, filepath.Join(mspDir, "admincerts")); err != nil {
 		return err
 	}
 	return nil
@@ -128,7 +106,6 @@ func generateNodes(baseDir string, nodeName string, signCA *ca.CA, tlsCA *ca.CA,
 			os.Exit(1)
 		}
 	}
-
 }
 
 func LoadCA(dir string) (*ca.CA, error) {
