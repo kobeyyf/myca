@@ -11,7 +11,6 @@ import (
 )
 
 type ActionAddUser struct {
-	saveDir string // xxx/xxx/example.com
 	*Args
 
 	CA    *ca.CA
@@ -21,41 +20,30 @@ type ActionAddUser struct {
 func (self *ActionAddUser) Check(args *Args) error {
 	self.Args = args
 
-	if self.domain == "" {
-		self.saveDir = args.dir
-		self.domain = filepath.Base(args.dir)
-	} else {
-		self.saveDir = filepath.Join(args.dir, args.domain)
+	if self.Name == "" {
+		return errors.New("Need user name")
 	}
-
-	if self.name == "" {
-		return errors.New("Need name")
-	}
-
-	self.CAPath = filepath.Join(self.saveDir, "ca")
-	self.tlsCAPath = filepath.Join(self.saveDir, "tlsca")
 
 	return nil
 }
 
 func (self *ActionAddUser) Run() (err error) {
-	self.CA, err = LoadCA(self.CAPath)
-	if err != nil {
-		fmt.Println(self.CAPath)
-		return err
-	}
-
-	self.TlsCA, err = LoadCA(self.tlsCAPath)
+	self.CA, err = LoadCA(self.caDir)
 	if err != nil {
 		return err
 	}
 
-	admin := fmt.Sprintf("%s@%s", "Admin", self.domain)
-	userName := fmt.Sprintf("%s@%s", self.name, self.domain)
-	generateNodes(filepath.Join(self.saveDir, "users"), userName, self.CA, self.TlsCA, msp.CLIENT, self.EnabledNodeOUs)
+	self.TlsCA, err = LoadCA(self.tlscaDir)
+	if err != nil {
+		return err
+	}
 
-	adminCertPath := filepath.Join(self.saveDir, "users", admin, "msp", "signcerts", admin+"-cert.pem")
-	if err = copyAdminCert(adminCertPath, filepath.Join(self.saveDir, "msp", "admincerts")); err != nil {
+	userName := fmt.Sprintf("%s@%s", self.Name, self.Domain)
+	generateNodes(self.usersDir, userName, self.CA, self.TlsCA, msp.CLIENT, true)
+
+	admin := "Admin@" + self.Domain
+	adminCertPath := filepath.Join(self.usersDir, admin, "msp", "signcerts", admin+"-cert.pem")
+	if err = copyAdminCert(adminCertPath, filepath.Join(self.usersDir, userName, "msp", "admincerts")); err != nil {
 		return err
 	}
 	// os.Remove(filepath.Join(self.saveDir, "users", userName, "msp", "admincerts", userName+"-cert.pem"))

@@ -20,12 +20,9 @@ type ActionAddPeer struct {
 func (self *ActionAddPeer) Check(args *Args) error {
 	self.Args = args
 
-	if self.name == "" {
-		return errors.New("Need name")
+	if self.Name == "" {
+		return errors.New("Need peer name")
 	}
-
-	self.CAPath = filepath.Join(self.saveDir, "ca")
-	self.tlsCAPath = filepath.Join(self.saveDir, "tlsca")
 
 	return nil
 }
@@ -45,7 +42,7 @@ func (self *ActionAddPeer) Run() (err error) {
 	peerMsp := filepath.Join(self.peersDir, peerName, "msp")
 	generateNodes(self.peersDir, peerName, self.CA, self.TlsCA, msp.PEER, true)
 
-	admin := "Admin@" + self.domain
+	admin := "Admin@" + self.Domain
 	adminCertPath := filepath.Join(self.usersDir, admin, "msp", "signcerts", admin+"-cert.pem")
 	if err = copyAdminCert(adminCertPath, filepath.Join(peerMsp, "admincerts")); err != nil {
 		return err

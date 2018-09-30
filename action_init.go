@@ -51,7 +51,7 @@ func (self *ActionInit) Run() (err error) {
 		return err
 	}
 
-	adminUser := "Admin@" + self.domain
+	adminUser := "Admin@" + self.Domain
 	generateNodes(self.usersDir, adminUser, self.CA, self.TlsCA, msp.CLIENT, false)
 
 	adminUserCertPath := filepath.Join(self.usersDir, adminUser, "msp", "signcerts", adminUser+"-cert.pem")

@@ -25,19 +25,33 @@ func (self *ActionAddOrg) Check(args *Args) error {
 	if self.Name == "" {
 		return errors.New("need org name: --name")
 	}
+	self.Domain = self.Name + "." + self.Domain
+	self.caDir = filepath.Join(self.Savedir, self.Domain, "ca")
+	self.usersDir = filepath.Join(self.Savedir, self.Domain, "users")
+	self.tlscaDir = filepath.Join(self.Savedir, self.Domain, "tlsca")
+	self.orderersDir = filepath.Join(self.Savedir, self.Domain, "orderers")
+	self.peersDir = filepath.Join(self.Savedir, self.Domain, "peers")
+
 	return nil
 }
 
 //
 func (self *ActionAddOrg) Run() (err error) {
 	self.CA, err = LoadCA(self.caDir)
-	if err != nil {
-		return err
+	if err != nil || self.CA == nil {
+		// fmt.Println(err)
+		self.CA, err = GenCA(self.caDir, "ca."+self.Domain, self.Args)
+		if err != nil {
+			return err
+		}
 	}
 
 	self.TlsCA, err = LoadCA(self.tlscaDir)
-	if err != nil {
-		return err
+	if err != nil || self.CA == nil {
+		self.TlsCA, err = GenCA(self.tlscaDir, "tlsca."+self.Domain, self.Args)
+		if err != nil {
+			return err
+		}
 	}
 
 	mspDir := filepath.Join(self.Savedir, self.Domain, "msp")
